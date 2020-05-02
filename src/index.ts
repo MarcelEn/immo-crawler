@@ -1,10 +1,11 @@
-import { getCurrentIds, browser } from "./service/immoCrawler";
 import { Database } from "sqlite3";
 import ApiImpl from "./api/ApiImpl";
-import { getDBPath } from "./helper/processArgs";
+import { getDBPath, getPort } from "./helper/processArgs";
 import Api from "./api/Api";
+import express from "express";
+import apiRouter from "./routes/api";
 
-const target = "https://www.immobilienscout24.de/Suche/de/baden-wuerttemberg/karlsruhe/groetzingen/haus-kaufen";
+export const PORT = getPort();
 
 export const createDB = (path: string) => new Promise<Database>((res, rej) => {
     const db = new Database(path, (err) => {
@@ -21,9 +22,11 @@ export let api: Api;
 (async () => {
     api = await ApiImpl(await createDB(getDBPath()));
 
-    const ids = await getCurrentIds(target);
-    for (let id of ids) {
-        console.log(id, await api.immoWhiteListDTO.byId(id) != null);
-    }
-    await (await browser).close();
+    const app = express();
+
+    app.use("/api", apiRouter);
+
+    app.use(express.static("../static"));
+
+    app.listen(PORT, () => console.log(`listening on ${PORT}`));
 })();

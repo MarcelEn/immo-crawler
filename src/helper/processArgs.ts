@@ -7,3 +7,5 @@ const getEnvStyledArg = (name: string, defaultValue: string) =>
 export const isDevModeEnabled = () => getEnvStyledArg("MODE", "PROD") === "DEV";
 
 export const getDBPath = () => getEnvStyledArg("DB_PATH", "db.db");
+
+export const getPort = () => parseInt(getEnvStyledArg("DB_PATH", "3000"), 10);
