@@ -1,4 +1,4 @@
-import { ImmoWhiteListDTO } from "./dto/immoWhiteList";
+import { ImmoWhiteListDTO } from "./dto/ImmoWhiteList";
 
 type Api = Readonly<{
     immoWhiteListDTO: ImmoWhiteListDTO;
