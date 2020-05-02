@@ -1,6 +1,7 @@
 import puppeteer from "puppeteer";
+import { isDevModeEnabled } from "../helper/processArgs";
 
-const browserArgs: puppeteer.LaunchOptions = process.env.MODE === "DEV" ?
+const browserArgs: puppeteer.LaunchOptions = isDevModeEnabled() ?
     {
         headless: false,
         slowMo: 100,

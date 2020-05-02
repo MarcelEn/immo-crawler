@@ -7,16 +7,18 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "tsc --watch",
     "start": "node dist/index.js",
-    "start-dev": "MODE=DEV node dist/index.js"
+    "start-dev": "node dist/index.js MODE=DEV"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
     "@types/puppeteer": "^2.0.1",
-    "puppeteer": "^3.0.2"
+    "puppeteer": "^3.0.2",
+    "sqlite3": "^4.2.0"
   },
   "devDependencies": {
+    "@types/sqlite3": "^3.1.6",
     "typescript": "^3.8.3"
   }
 }
