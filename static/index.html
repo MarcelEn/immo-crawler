@@ -8,23 +8,114 @@
             display: none;
         }
     </style>
+    <script>
+        console.log = (...args) => {
+            document.getElementById("info").innerHTML += `<p>${args.map(arg => `${arg}`).join("<br/>")}</p>`;
+        }
+
+        const log = console.log
+
+        const urlBase64ToUint8Array = base64String => {
+            const padding = '='.repeat((4 - (base64String.length % 4)) % 4)
+            const base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/')
+            const rawData = atob(base64)
+            const outputArray = new Uint8Array(rawData.length)
+            for (let i = 0; i < rawData.length; ++i) {
+                outputArray[i] = rawData.charCodeAt(i)
+            }
+            return outputArray
+        }
+
+        async function unregister() {
+            const id = localStorage.getItem("pushId");
+            await fetch(`/api/subscription/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+            });
+
+            await (await (await navigator.serviceWorker.ready)
+                .pushManager.getSubscription())
+                .unsubscribe();
+
+            localStorage.removeItem("pushId");
+
+            document.getElementById("registered").className = "hidden";
+            document.getElementById("unregistered").className = "";
+        }
+
+        async function register() {
+            const permissionResult = await Notification.requestPermission();
+            if (permissionResult !== "granted") return log("You have to grant permissions for Notifications.");
+
+            const registration = await navigator.serviceWorker.register('/service-worker.js');
+            const subscribeOptions = {
+                userVisibleOnly: true,
+                applicationServerKey: urlBase64ToUint8Array(
+                    'BHHtqPdUAydxaSo1X2MXxbKdUSL5KxTzaJEOPVxcVaBJhUpv4aPe1D5ZlvLAKkJYLV0ZyZF9-uCJOO0bsilMw9I'
+                )
+            };
+
+            const pushSubscription = await registration.pushManager.subscribe(subscribeOptions);
+
+            const { id } = await (await fetch('/api/subscription', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(pushSubscription)
+            })).json();
+
+            localStorage.setItem("pushId", id);
+
+            document.getElementById("registered").className = "";
+            document.getElementById("unregistered").className = "hidden";
+        }
+
+        function init() {
+            const pushId = localStorage.getItem("pushId");
+
+            if (!('serviceWorker' in navigator)) {
+                return log("Service Worker isn't supported on this browser.");
+            }
+
+            if (!('PushManager' in window)) {
+                return log("Push isn't supported on this browser.");
+            }
+
+            if (!('Notification' in window)) {
+                return log("Notification isn't supported on this browser.");
+            }
+
+            if (!!pushId) {
+                document.getElementById("registered").className = "";
+            } else {
+                document.getElementById("unregistered").className = "";
+            }
+        }
+
+        document.onreadystatechange = function () {
+            if (document.readyState === "complete") {
+                init();
+            }
+        }
+    </script>
 </head>
 
 <body>
     <h1>Immo Crawler</h1>
     <div id="registered" class="hidden">
-        <h2>You are already registerd</h2>
-        <button onclick="unregister()">unregister</button>)
+        <h2>You are already registered</h2>
+        <button onclick="unregister()">unregister</button>
     </div>
 
     <div id="unregistered" class="hidden">
-        <h2>You aren´t registerd yet</h2>
-        <button onclick="unregister()">register</button>)
+        <h2>You aren´t registered yet</h2>
+        <button onclick="register()">register</button>
     </div>
 
-    <div id="errors" class="hidden">
-
-    </div>
+    <div id="info" />
 </body>
 
 </html>

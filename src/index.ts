@@ -26,7 +26,7 @@ export let api: Api;
 
     app.use("/api", apiRouter);
 
-    app.use(express.static("../static"));
+    app.use(express.static("static"));
 
     app.listen(PORT, () => console.log(`listening on ${PORT}`));
 })();
